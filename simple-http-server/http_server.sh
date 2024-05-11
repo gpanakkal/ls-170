@@ -20,16 +20,17 @@ function server() {
     then
       if [[ -f "./www/$path" ]]
       then
-        echo -ne 'HTTP/1.1 200 OK\r\n\r\n'; cat "./www/$path"
+        length=`wc -c < ./www/$path`
+        echo -ne "HTTP/1.1 200 OK\r\nContent-Type:text/html; charset=utf-8\r\nContent-Length: $length\r\n\r\n"; cat "./www/$path"
       else
-        echo -ne 'HTTP/1.1 404 Not Found\r\n\r\n'
+        echo -ne 'HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n'
       fi
     else
-      echo -ne 'HTTP 1.1 400 Bad Request\r\n\r\n'
+      echo -ne 'HTTP 1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n'
     fi
   done
 }
 
 coproc SERVER_PROCESS { server; }
 
-netcat -lv 2345 <&${SERVER_PROCESS[0]} >&${SERVER_PROCESS[1]}
+netcat -lkv 2345 <&${SERVER_PROCESS[0]} >&${SERVER_PROCESS[1]}
